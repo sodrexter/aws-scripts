@@ -1,0 +1,14 @@
+#!/bin/bash
+#Simpel script to list ALL s3 buckets that are policy status = to ispublic an output from get-bucket-policy-status. 
+BUCKET=$(aws s3api list-buckets | jq -r '.Buckets[].Name')
+for BUCKET in $BUCKET
+do
+if aws s3api get-bucket-policy-status --bucket "$BUCKET" &> /dev/null; then
+PolicyStatus=$(aws s3api get-bucket-policy-status --bucket "$BUCKET" | xargs -I {} | grep "IsPublic")
+if [ "$PolicyStatus" == "IsPublic: true" ]; then
+echo "Public:YES" "$BUCKET" 
+fi
+else
+echo "Public:NO" "$BUCKET"
+fi
+done
