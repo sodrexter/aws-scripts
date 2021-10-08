@@ -1,0 +1,15 @@
+#!/bin/bash
+BUCKET=$(aws s3api list-buckets | jq -r '.Buckets[].Name')
+for BUCKET in $BUCKET
+do
+if aws s3api get-bucket-policy --bucket "$BUCKET" &> /dev/null; then
+ssl=$(aws s3api get-bucket-policy --bucket "$BUCKET" --query Policy --output text | xargs -I {} | grep -o "Version")
+if [ "$ssl" == "Version" ]; then
+echo "Bucket Name:" "$BUCKET"
+echo "Policy:""\"$(aws s3api get-bucket-policy --bucket "$BUCKET" --query Policy --output text | xargs -I {} )\""
+echo
+fi
+else
+echo "No Bucket Policy" "$BUCKET"
+fi
+done
